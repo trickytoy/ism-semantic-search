@@ -23,9 +23,6 @@ export default function SearchForm({ fileData }: FileDataProps) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])  // Use SearchResult type
   const [showAll, setShowAll] = useState(false) // Track whether to show all results or only the first 10
 
-  const API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2";
-  const AUTH_TOKEN = "Bearer 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"; // Replace with your actual token
-
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSearching(true)
@@ -34,19 +31,16 @@ export default function SearchForm({ fileData }: FileDataProps) {
     const result = fileData.map(item => Object.values(item).join('|'))
 
     try {
-      // Call Hugging Face API with search query and file data
-      const response = await fetch(API_URL, {
+      // Call the Next.js API route with the search query and file data
+      const response = await fetch('/api/', {
         method: 'POST',
         headers: {
-          'Authorization': AUTH_TOKEN,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: {
-            source_sentence: searchQuery,
-            sentences: result,
-          }
-        })
+          searchQuery,
+          result,
+        }),
       });
 
       const output = await response.json();
@@ -106,9 +100,13 @@ export default function SearchForm({ fileData }: FileDataProps) {
       {searchResults.length > 0 && (
         <div className="mt-8 w-full">
           <h2 className="text-2xl font-bold mb-4">Search Results</h2>
-          <ul className="space-y-4">
+          {/* Use grid layout to create 3 columns */}
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayedResults.map((result, index) => (
-              <li key={index} className="bg-white p-4 rounded-lg shadow">
+              <li 
+                key={index} 
+                className="bg-white p-4 rounded-lg shadow transition-transform transform hover:scale-105 hover:shadow-lg hover:bg-gray-100"
+              >
                 <h3 className="text-lg font-bold">{result.Guideline}</h3>
                 <p><strong>Section:</strong> {result.Section}</p>
                 <p><strong>Topic:</strong> {result.Topic}</p>
